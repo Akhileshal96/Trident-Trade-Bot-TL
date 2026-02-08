@@ -192,10 +192,9 @@ def run_trading_loop(kite, poll_seconds=30, max_cycles=None, dry_run=False):
                     )
                     logger.info("SELL %s: qty=%s at %s (Order ID: %s)", symbol, qty, last_price, order_id)
                     log_trade("SELL", symbol, qty, last_price)
+                    open_trades.pop(symbol, None)
                 except Exception as exc:
                     logger.error("Error placing SELL order for %s: %s", symbol, exc)
-
-                open_trades.pop(symbol, None)
 
             time.sleep(poll_seconds)
         else:

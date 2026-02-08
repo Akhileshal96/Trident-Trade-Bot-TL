@@ -65,21 +65,31 @@ def main():
         for lag in range(1, 6):
             df[f"Return_lag{lag}"] = df["Return"].shift(lag)
 
-        df["Target"] = (df["Return"].shift(-1) > 0).astype(int)
-        df.dropna(inplace=True)
-
         features = [f"Return_lag{lag}" for lag in range(1, 6)]
-        X = df[features]
-        y = df["Target"]
 
-        if len(y.unique()) < 2:
+        latest_features = df[features].iloc[-1]
+        if latest_features.isna().any():
+            continue
+
+        train_df = df.copy()
+        next_return = train_df["Return"].shift(-1)
+        train_df["Target"] = (next_return > 0).where(next_return.notna())
+        train_df.dropna(subset=features + ["Target"], inplace=True)
+        if train_df.empty:
+            continue
+
+        train_df["Target"] = train_df["Target"].astype(int)
+        X_train = train_df[features]
+        y_train = train_df["Target"]
+
+        if len(y_train.unique()) < 2:
             continue
 
         model = RandomForestClassifier(n_estimators=100, random_state=42)
-        model.fit(X, y)
+        model.fit(X_train, y_train)
         models[symbol] = model
 
-        pred = model.predict(X.iloc[-1].values.reshape(1, -1))[0]
+        pred = model.predict(latest_features.values.reshape(1, -1))[0]
         if pred == 1:
             predictions.append(symbol.replace(".NS", ""))
 

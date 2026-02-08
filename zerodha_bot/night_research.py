@@ -74,9 +74,11 @@ def main():
         train_df = df.copy()
         next_return = train_df["Return"].shift(-1)
         train_df["Target"] = (next_return > 0).where(next_return.notna())
-        train_df.dropna(inplace=True)
-        train_df["Target"] = train_df["Target"].astype(int)
+        train_df.dropna(subset=features + ["Target"], inplace=True)
+        if train_df.empty:
+            continue
 
+        train_df["Target"] = train_df["Target"].astype(int)
         X_train = train_df[features]
         y_train = train_df["Target"]
 

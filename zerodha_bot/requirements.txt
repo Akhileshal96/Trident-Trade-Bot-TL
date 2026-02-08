@@ -1,0 +1,9 @@
+kiteconnect
+pandas
+numpy
+yfinance
+scikit-learn
+pyTelegramBotAPI
+python-dotenv
+pytz
+openpyxl
